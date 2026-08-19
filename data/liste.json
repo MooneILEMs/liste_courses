@@ -1,5 +1,5 @@
 {
-  "maj": 1787162210079,
+  "maj": 1787164646060,
   "articles": [
     {
       "id": "7c202284-ee01-4727-afda-571e657ef7d6",
@@ -20,10 +20,19 @@
     {
       "id": "6f631a96-6741-47f0-bbc7-97f1d1325f9d",
       "texte": "chocolat",
-      "pris": false,
+      "pris": true,
       "par": "Moone",
       "cree": 1787162207579,
-      "horodatage": 1787162207579
+      "horodatage": 1787164643558,
+      "supprime": true
+    },
+    {
+      "id": "e06d253c-1991-4d42-a4e1-8982b5682873",
+      "texte": "cacao",
+      "pris": false,
+      "par": "Moone",
+      "cree": 1787164637567,
+      "horodatage": 1787164637567
     }
   ]
 }
