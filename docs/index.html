@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EFF1EC">
+<title>La liste</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --papier:#EFF1EC;
+  --encre:#1B2A22;
+  --stylo:#1D3FBE;
+  --marge:#D4453C;
+  --reglure:#C3D0E8;
+  --rature:#9AA396;
+  --ligne:34px;
+  --gouttiere:52px;
+  --display:"Familjen Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --corps:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  background:var(--papier);
+  color:var(--encre);
+  font-family:var(--corps);
+  font-size:17px;
+  line-height:var(--ligne);
+  overscroll-behavior-y:none;
+}
+#feuille{
+  position:relative;
+  max-width:560px;
+  margin:0 auto;
+  min-height:100%;
+  padding:0 20px calc(112px + env(safe-area-inset-bottom)) var(--gouttiere);
+  background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--ligne) - 1px),var(--reglure) calc(var(--ligne) - 1px),var(--reglure) var(--ligne));
+  background-position:0 8px;
+}
+#feuille::before{
+  content:"";position:absolute;top:0;bottom:0;left:calc(var(--gouttiere) - 14px);
+  width:1px;background:var(--marge);opacity:.55;
+}
+
+header{padding:calc(var(--ligne) * 1.5) 0 0}
+h1{
+  font-family:var(--display);font-weight:700;font-size:30px;
+  line-height:var(--ligne);margin:0;letter-spacing:-.02em;
+}
+#etat{
+  font-family:var(--display);font-weight:500;font-size:13px;line-height:var(--ligne);
+  color:var(--rature);letter-spacing:.02em;
+}
+#etat[data-ton="alerte"]{color:var(--marge)}
+#etat[data-ton="actif"]{color:var(--stylo)}
+
+ul{list-style:none;margin:calc(var(--ligne) / 2) 0 0;padding:0}
+li{
+  position:relative;display:flex;gap:10px;align-items:baseline;
+  line-height:var(--ligne);min-height:var(--ligne);cursor:pointer;
+}
+li .texte{position:relative;flex:1;padding-right:4px;word-break:break-word}
+li .texte::after{
+  content:"";position:absolute;left:-3px;top:calc(50% - 1px);height:2px;width:0;
+  background:var(--stylo);border-radius:2px;transition:width .22s ease-out;
+}
+li.pris .texte{color:var(--rature)}
+li.pris .texte::after{width:calc(100% + 6px)}
+li .par{
+  font-family:var(--display);font-weight:500;font-size:11px;
+  color:var(--rature);letter-spacing:.06em;text-transform:uppercase;flex:none;
+}
+li .oter{
+  flex:none;border:0;background:none;color:var(--rature);font-size:19px;
+  line-height:var(--ligne);padding:0 2px;cursor:pointer;opacity:0;transition:opacity .15s;
+}
+li.pris .oter,li:hover .oter,li .oter:focus-visible{opacity:1}
+
+#vide{color:var(--rature);line-height:var(--ligne)}
+
+#pied{
+  position:fixed;left:0;right:0;bottom:0;
+  padding:10px 20px calc(10px + env(safe-area-inset-bottom));
+  background:linear-gradient(to top,var(--papier) 74%,transparent);
+}
+#pied form{display:flex;gap:8px;max-width:560px;margin:0 auto}
+#saisie{
+  flex:1;min-width:0;font:inherit;color:var(--encre);
+  background:#fff;border:1px solid var(--reglure);border-radius:2px;
+  padding:9px 12px;line-height:22px;
+}
+#saisie:focus{outline:2px solid var(--stylo);outline-offset:-1px;border-color:transparent}
+#saisie::placeholder{color:var(--rature)}
+button.action{
+  font-family:var(--display);font-weight:700;font-size:15px;
+  background:var(--stylo);color:#fff;border:0;border-radius:2px;padding:0 18px;cursor:pointer;
+}
+#ranger{
+  display:none;margin:var(--ligne) 0 0;background:none;color:var(--rature);
+  border:0;padding:0;font-family:var(--display);font-weight:500;font-size:13px;
+  line-height:var(--ligne);cursor:pointer;text-decoration:underline;text-underline-offset:3px;
+}
+#ranger:hover{color:var(--encre)}
+
+dialog{
+  border:1px solid var(--reglure);border-radius:3px;background:#fff;color:var(--encre);
+  max-width:min(420px,calc(100vw - 32px));padding:22px;font-size:15px;line-height:1.5;
+}
+dialog::backdrop{background:rgba(27,42,34,.32)}
+dialog h2{font-family:var(--display);font-size:19px;margin:0 0 10px;line-height:1.3}
+dialog p{margin:0 0 14px;color:#4A574F}
+dialog label{display:block;font-size:13px;color:#4A574F;margin:12px 0 4px}
+dialog input,dialog select{
+  width:100%;font:inherit;padding:8px 10px;border:1px solid var(--reglure);
+  border-radius:2px;background:#fff;color:var(--encre);
+}
+dialog .rangee{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+dialog button.plat{background:none;border:0;color:var(--rature);cursor:pointer;font:inherit}
+dialog button.action{padding:9px 18px}
+a{color:var(--stylo)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div id="feuille">
+  <header>
+    <h1>La liste</h1>
+    <div id="etat">Chargement…</div>
+  </header>
+  <ul id="liste"></ul>
+  <p id="vide" hidden>Rien pour l'instant. Tape ci-dessous.</p>
+  <button id="ranger" type="button">Retirer ce qui est pris</button>
+</div>
+
+<div id="pied">
+  <form id="ajout" autocomplete="off">
+    <input id="saisie" type="text" placeholder="Ajouter…" enterkeyhint="done" aria-label="Nouvel article">
+    <button class="action" type="submit">Ajouter</button>
+  </form>
+</div>
+
+<dialog id="reglages">
+  <h2>Connecter la liste</h2>
+  <p>Ces informations restent sur cet appareil. Elles ne sont jamais publiées dans le dépôt.</p>
+  <label for="f-depot">Dépôt</label>
+  <input id="f-depot" placeholder="pseudo/liste-courses">
+  <label for="f-qui">C'est qui ?</label>
+  <select id="f-qui"></select>
+  <label for="f-jeton">Jeton GitHub</label>
+  <input id="f-jeton" type="password" placeholder="github_pat_…">
+  <div class="rangee">
+    <button class="plat" type="button" id="annuler">Annuler</button>
+    <button class="action" type="button" id="enregistrer">Enregistrer</button>
+  </div>
+</dialog>
+
+<script>
+const FICHIER = "data/liste.json";
+const NOMS = ["Jean", "Ma conjointe"];
+const CLE = "liste-courses";
+
+let cfg = JSON.parse(localStorage.getItem(CLE + ":cfg") || "null");
+let etatDoc = JSON.parse(localStorage.getItem(CLE + ":doc") || 'null') || { articles: [] };
+let sha = localStorage.getItem(CLE + ":sha") || null;
+let sale = false, envoiEnCours = false, minuteur = null;
+
+const $ = s => document.querySelector(s);
+const listeEl = $("#liste"), etatEl = $("#etat"), videEl = $("#vide"), rangerEl = $("#ranger");
+
+const dit = (t, ton = "") => { etatEl.textContent = t; etatEl.dataset.ton = ton; };
+const b64 = txt => btoa(String.fromCharCode(...new TextEncoder().encode(txt)));
+const deb64 = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, "")), c => c.charCodeAt(0)));
+const maintenant = () => Date.now();
+const sauveLocal = () => {
+  localStorage.setItem(CLE + ":doc", JSON.stringify(etatDoc));
+  if (sha) localStorage.setItem(CLE + ":sha", sha);
+};
+
+function rendre() {
+  listeEl.textContent = "";
+  const visibles = etatDoc.articles.filter(a => !a.supprime);
+  visibles.sort((a, b) => (a.pris === b.pris) ? a.cree - b.cree : (a.pris ? 1 : -1));
+
+  for (const a of visibles) {
+    const li = document.createElement("li");
+    li.className = a.pris ? "pris" : "";
+    li.dataset.id = a.id;
+
+    const t = document.createElement("span");
+    t.className = "texte";
+    t.textContent = a.texte;
+
+    const par = document.createElement("span");
+    par.className = "par";
+    par.textContent = a.par === cfg?.qui ? "" : (a.par || "");
+
+    const x = document.createElement("button");
+    x.className = "oter";
+    x.type = "button";
+    x.setAttribute("aria-label", "Retirer " + a.texte);
+    x.textContent = "×";
+    x.addEventListener("click", e => { e.stopPropagation(); retirer(a.id); });
+
+    li.append(t, par, x);
+    li.addEventListener("click", () => basculer(a.id));
+    listeEl.append(li);
+  }
+
+  videEl.hidden = visibles.length > 0;
+  rangerEl.style.display = visibles.some(a => a.pris) ? "block" : "none";
+}
+
+function modifier(fn) {
+  fn();
+  etatDoc.maj = maintenant();
+  sale = true;
+  sauveLocal();
+  rendre();
+  planifier();
+}
+
+const basculer = id => modifier(() => {
+  const a = etatDoc.articles.find(x => x.id === id);
+  if (!a) return;
+  a.pris = !a.pris;
+  a.horodatage = maintenant();
+  a.par = cfg?.qui || a.par;
+});
+
+const retirer = id => modifier(() => {
+  const a = etatDoc.articles.find(x => x.id === id);
+  if (!a) return;
+  a.supprime = true;
+  a.horodatage = maintenant();
+});
+
+$("#ajout").addEventListener("submit", e => {
+  e.preventDefault();
+  const champ = $("#saisie");
+  const texte = champ.value.trim();
+  if (!texte) return;
+  champ.value = "";
+  modifier(() => etatDoc.articles.push({
+    id: crypto.randomUUID(), texte, pris: false,
+    par: cfg?.qui || "", cree: maintenant(), horodatage: maintenant()
+  }));
+});
+
+rangerEl.addEventListener("click", () => modifier(() => {
+  for (const a of etatDoc.articles) if (a.pris && !a.supprime) { a.supprime = true; a.horodatage = maintenant(); }
+}));
+
+function fusionner(distant) {
+  const par_id = new Map();
+  for (const a of distant.articles || []) par_id.set(a.id, a);
+  for (const a of etatDoc.articles) {
+    const d = par_id.get(a.id);
+    if (!d || (a.horodatage || 0) >= (d.horodatage || 0)) par_id.set(a.id, a);
+  }
+  const limite = maintenant() - 7 * 864e5;
+  etatDoc.articles = [...par_id.values()].filter(a => !a.supprime || (a.horodatage || 0) > limite);
+}
+
+async function gh(chemin, options = {}) {
+  const r = await fetch(`https://api.github.com/repos/${cfg.depot}/${chemin}`, {
+    ...options,
+    headers: {
+      Authorization: "Bearer " + cfg.jeton,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      ...(options.headers || {})
+    }
+  });
+  return r;
+}
+
+async function tirer() {
+  const r = await gh(`contents/${FICHIER}?t=${maintenant()}`, { cache: "no-store" });
+  if (r.status === 404) { sha = null; return; }
+  if (!r.ok) throw new Error(r.status === 401 ? "Jeton refusé" : "Lecture impossible (" + r.status + ")");
+  const j = await r.json();
+  sha = j.sha;
+  fusionner(JSON.parse(deb64(j.content)));
+  sauveLocal();
+  rendre();
+}
+
+async function pousser() {
+  const corps = JSON.stringify({ maj: maintenant(), articles: etatDoc.articles }, null, 2) + "\n";
+  const r = await gh(`contents/${FICHIER}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      message: `liste: maj par ${cfg.qui}`,
+      content: b64(corps),
+      ...(sha ? { sha } : {})
+    })
+  });
+  if (r.status === 409 || r.status === 422) { await tirer(); return false; }
+  if (!r.ok) throw new Error(r.status === 401 ? "Jeton refusé" : "Écriture impossible (" + r.status + ")");
+  sha = (await r.json()).content.sha;
+  sauveLocal();
+  return true;
+}
+
+const planifier = () => {
+  clearTimeout(minuteur);
+  minuteur = setTimeout(synchroniser, 2500);
+};
+
+async function synchroniser() {
+  if (!cfg || envoiEnCours) return;
+  if (!navigator.onLine) { dit("Hors ligne — les ajouts partiront au retour du réseau", "alerte"); return; }
+  envoiEnCours = true;
+  const envoyait = sale;
+  dit("Synchronisation…", "actif");
+  try {
+    if (envoyait) {
+      sale = false;
+      let ok = await pousser();
+      if (!ok) ok = await pousser();
+      if (!ok) sale = true;
+    } else {
+      await tirer();
+    }
+    dit(sale ? "En attente" : "À jour");
+  } catch (e) {
+    if (envoyait) sale = true;
+    dit(e.message, "alerte");
+  } finally {
+    envoiEnCours = false;
+  }
+}
+
+const dlg = $("#reglages");
+NOMS.forEach(n => { const o = document.createElement("option"); o.value = n; o.textContent = n; $("#f-qui").append(o); });
+
+function ouvrirReglages() {
+  $("#f-depot").value = cfg?.depot || "";
+  $("#f-qui").value = cfg?.qui || NOMS[0];
+  $("#f-jeton").value = cfg?.jeton || "";
+  dlg.showModal();
+}
+$("#annuler").addEventListener("click", () => dlg.close());
+$("#enregistrer").addEventListener("click", () => {
+  const depot = $("#f-depot").value.trim().replace(/^https?:\/\/github\.com\//, "").replace(/\/$/, "");
+  const jeton = $("#f-jeton").value.trim();
+  if (!depot.includes("/") || !jeton) { dit("Dépôt et jeton sont nécessaires", "alerte"); return; }
+  cfg = { depot, qui: $("#f-qui").value, jeton };
+  localStorage.setItem(CLE + ":cfg", JSON.stringify(cfg));
+  dlg.close();
+  rendre();
+  synchroniser();
+});
+$("#etat").addEventListener("click", ouvrirReglages);
+document.querySelector("h1").addEventListener("dblclick", ouvrirReglages);
+
+rendre();
+if (!cfg) { dit("Connecter la liste", "alerte"); ouvrirReglages(); }
+else synchroniser();
+
+setInterval(() => { if (document.visibilityState === "visible") synchroniser(); }, 20000);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") synchroniser(); });
+window.addEventListener("online", synchroniser);
+</script>
+</body>
+</html>

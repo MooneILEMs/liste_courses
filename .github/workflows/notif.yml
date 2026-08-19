@@ -1,0 +1,56 @@
+name: Prévenir l'autre
+
+on:
+  push:
+    branches: [main]
+    paths: ["data/liste.json"]
+
+concurrency:
+  group: notif
+  cancel-in-progress: true
+
+jobs:
+  mail:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Préparer le message
+        id: prep
+        run: |
+          MSG="${{ github.event.head_commit.message }}"
+          AUTEUR="${MSG#liste: maj par }"
+          if [ "$AUTEUR" = "${{ secrets.NOM_A }}" ]; then
+            echo "dest=${{ secrets.MAIL_B }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "dest=${{ secrets.MAIL_A }}" >> "$GITHUB_OUTPUT"
+          fi
+          echo "auteur=$AUTEUR" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "corps<<FIN"
+            jq -r '.articles
+                   | map(select(.supprime != true and .pris != true))
+                   | if length == 0 then "La liste est vide."
+                     else map("- " + .texte) | join("\n") end' data/liste.json
+            echo ""
+            echo "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+            echo "FIN"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Envoyer
+        if: steps.prep.outputs.dest != ''
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.SMTP_USER }}
+          password: ${{ secrets.SMTP_PASS }}
+          from: La liste <${{ secrets.SMTP_USER }}>
+          to: ${{ steps.prep.outputs.dest }}
+          subject: "La liste a changé — ${{ steps.prep.outputs.auteur }}"
+          body: |
+            Reste à prendre :
+
+            ${{ steps.prep.outputs.corps }}
