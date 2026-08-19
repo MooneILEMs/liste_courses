@@ -1,4 +1,21 @@
 {
-  "maj": 0,
-  "articles": []
+  "maj": 1787161615350,
+  "articles": [
+    {
+      "id": "7c202284-ee01-4727-afda-571e657ef7d6",
+      "texte": "lait",
+      "pris": false,
+      "par": "Moone",
+      "cree": 1787161049439,
+      "horodatage": 1787161049439
+    },
+    {
+      "id": "77f18d62-27cd-4b7a-8102-488107679f27",
+      "texte": "sucre",
+      "pris": false,
+      "par": "Moone",
+      "cree": 1787161612834,
+      "horodatage": 1787161612834
+    }
+  ]
 }
