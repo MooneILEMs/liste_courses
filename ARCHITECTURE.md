@@ -60,7 +60,7 @@ Le point 5 mérite une précision. L'API GitHub exige le `sha` de la version qu'
 |---|---|---|
 | `docs/index.html` | toute l'appli : structure, apparence, comportement | toi, à la main |
 | `docs/manifest.json` | permet l'ajout à l'écran d'accueil | jamais |
-| `docs/icon.svg`, `docs/icon-192.png`, `docs/icon-512.png` | l'icône de l'appli, en plusieurs formats — les launchers Android gèrent mal le SVG seul | jamais |
+| `docs/icon.png` | l'icône de l'appli (PNG, pas SVG — les launchers Android gèrent mal le SVG seul) | jamais |
 | `docs/.nojekyll` | dit à Pages de publier les fichiers tels quels | jamais |
 | `data/liste.json` | la liste | l'appli, automatiquement |
 | `.github/workflows/notif.yml` | recette du mail | toi, si tu changes le SMTP |
