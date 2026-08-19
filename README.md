@@ -1,72 +1,72 @@
 # La liste
 
-Liste de courses partagée à deux. Page statique sur GitHub Pages, données dans `data/liste.json`, mail à l'autre à chaque modification.
+A shared shopping list for two, built as a static page on GitHub Pages that emails the other person whenever the list changes.
 
-## Fonctionnement
+## How it works
 
-Le navigateur lit et écrit `data/liste.json` via l'API GitHub, avec un jeton saisi une fois par appareil et gardé en local. Chaque écriture crée un commit ; le workflow lit l'auteur dans le message de commit et envoie le mail à l'autre personne.
+The browser reads and writes `data/liste.json` through the GitHub API, using a token entered once per device and kept locally. Every write creates a commit; the workflow reads the author from the commit message and emails the other person.
 
-Le site publié se limite à `docs/`. Les données vivent dans `data/`, hors du dossier publié : l'appli y accède par l'API, jamais par l'URL du site. Un dépôt privé rend donc la liste réellement inaccessible, même si la page, elle, reste ouverte à qui a l'adresse.
+The published site is limited to `docs/`. The data lives in `data/`, outside the published folder: the app reaches it through the API, never through the site's URL. A private repo therefore makes the list genuinely inaccessible, even though the page itself stays reachable to anyone with the address.
 
 ```
-docs/          publié par Pages — la page, rien de sensible
-data/          la liste — jamais servie par le site
-.github/       le workflow qui envoie le mail
+docs/          published by Pages — the page, nothing sensitive
+data/          the list — never served by the site
+.github/       the workflow that sends the email
 ```
 
-Les modifications sont groupées : l'envoi part 2,5 s après la dernière frappe, pas à chaque article. Hors réseau, tout reste utilisable et repart à la reconnexion.
+Changes are batched: the send goes out 2.5s after the last keystroke, not on every item. Offline, everything stays usable and syncs back up on reconnection.
 
-## Installation
+## Setup
 
-**1. Le dépôt**
+**1. The repo**
 
-Crée le dépôt, pousse ces fichiers, puis Settings → Pages → Source : `Deploy from a branch`, branche `main`, dossier **`/docs`**.
+Create the repo, push these files, then Settings → Pages → Source: `Deploy from a branch`, branch `main`, folder **`/docs`**.
 
-Mets le dépôt en privé si tu veux que la liste le soit : `data/liste.json` n'est alors visible ni sur github.com ni sur le site. Pages depuis un dépôt privé demande un compte Pro — gratuit via le GitHub Student Developer Pack. En dépôt public, le fichier reste lisible sur github.com par n'importe qui.
+Make the repo private if you want the list to be private too: `data/liste.json` is then visible neither on github.com nor on the site. Pages from a private repo requires a Pro account — free via the GitHub Student Developer Pack. With a public repo, the file stays readable on github.com by anyone.
 
-Dans les deux cas, la page publiée est accessible à qui connaît l'URL. Ce n'est pas un problème : sans jeton, elle est vide.
+Either way, the published page is reachable by anyone who knows the URL. That's not a problem: without a token, it's empty.
 
-**2. Les prénoms**
+**2. The names**
 
-Dans `docs/index.html`, remplace la ligne `const NOMS = ["Jean", "Ma conjointe"];` par vos deux prénoms. Ils doivent correspondre exactement aux secrets ci-dessous.
+In `docs/index.html`, replace the line `const NOMS = ["Jean", "Ma conjointe"];` with your two first names. They must match the secrets below exactly.
 
-**3. Le jeton, sur chaque téléphone**
+**3. The token, on each phone**
 
 Settings → Developer settings → Personal access tokens → Fine-grained tokens.
 
-- Repository access : ce dépôt uniquement
-- Permissions → Repository → Contents : **Read and write**
-- Expiration : 1 an maximum, à renouveler
+- Repository access: this repo only
+- Permissions → Repository → Contents: **Read and write**
+- Expiration: 1 year max, renew as needed
 
-Ouvre le site, la fenêtre de connexion s'affiche : dépôt (`pseudo/liste-courses`), qui tu es, jeton. Pour la rouvrir ensuite, touche la ligne d'état sous le titre.
+Open the site, the connection window appears: repo (`username/liste-courses`), who you are, token. To reopen it later, tap the status line under the title.
 
-Le jeton reste dans le navigateur de l'appareil. Sa portée est limitée à ce dépôt : au pire, quelqu'un modifie la liste de courses.
+The token stays in the device's browser. Its scope is limited to this repo: worst case, someone edits the shopping list.
 
-**4. Le mail**
+**4. The email**
 
-Le workflow passe par le SMTP de Gmail. Il faut la validation en deux étapes activée, puis un mot de passe d'application : myaccount.google.com → Sécurité → Mots de passe des applications.
+The workflow goes through Gmail's SMTP. It needs 2-step verification enabled, then an app password: myaccount.google.com → Security → App passwords.
 
-Settings → Secrets and variables → Actions, ajoute :
+Settings → Secrets and variables → Actions, add:
 
-| Secret | Valeur |
+| Secret | Value |
 |---|---|
-| `SMTP_USER` | l'adresse Gmail qui envoie |
-| `SMTP_PASS` | le mot de passe d'application (16 caractères) |
-| `NOM_A` | le premier prénom, identique à `NOMS[0]` |
-| `MAIL_A` | son adresse |
-| `MAIL_B` | l'adresse de l'autre |
+| `SMTP_USER` | the Gmail address that sends |
+| `SMTP_PASS` | the app password (16 characters) |
+| `NOM_A` | the first name, identical to `NOMS[0]` |
+| `MAIL_A` | their address |
+| `MAIL_B` | the other person's address |
 
-**5. Sur le téléphone**
+**5. On the phone**
 
-Ajoute la page à l'écran d'accueil : elle s'ouvre en plein écran, sans barre de navigateur.
+Add the page to the home screen: it opens full-screen, without a browser bar.
 
 ## Usage
 
-Taper puis Entrée pour ajouter. Toucher une ligne pour la barrer. Le × retire l'article, « Retirer ce qui est pris » vide les lignes barrées d'un coup.
+Type then Enter to add. Tap a line to cross it out. The × removes the item, "Retirer ce qui est pris" clears the crossed-out lines all at once.
 
-## Limites
+## Limits
 
-- Environ 2 à 3 secondes entre une modification et son apparition chez l'autre ; l'écran se rafraîchit toutes les 20 s quand il est ouvert.
-- Édition simultanée : la version la plus récente de chaque article gagne, article par article. Rien n'est perdu, mais deux modifications du même article dans la même seconde peuvent en écraser une.
-- Les articles retirés sont conservés 7 jours dans le fichier avant d'être purgés, le temps que les deux appareils voient la suppression.
-- Un commit par modification : l'historique du dépôt grossit vite. Sans importance, mais c'est visible.
+- About 2 to 3 seconds between a change and its appearance on the other device; the screen refreshes every 20s while open.
+- Simultaneous edits: the most recent version of each item wins, item by item. Nothing is lost, but two edits to the same item within the same second can overwrite one another.
+- Removed items are kept for 7 days in the file before being purged, giving both devices time to see the deletion.
+- One commit per change: the repo's history grows fast. Harmless, but visible.
