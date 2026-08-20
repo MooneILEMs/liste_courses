@@ -1,21 +1,23 @@
 {
-  "maj": 1787169322166,
+  "maj": 1787240421222,
   "articles": [
     {
       "id": "7c202284-ee01-4727-afda-571e657ef7d6",
       "texte": "lait",
-      "pris": false,
+      "pris": true,
       "par": "Moone",
       "cree": 1787161049439,
-      "horodatage": 1787169319663
+      "horodatage": 1787240418720,
+      "supprime": true
     },
     {
       "id": "77f18d62-27cd-4b7a-8102-488107679f27",
       "texte": "sucre",
-      "pris": false,
+      "pris": true,
       "par": "Moone",
       "cree": 1787161612834,
-      "horodatage": 1787161612834
+      "horodatage": 1787240418720,
+      "supprime": true
     },
     {
       "id": "6f631a96-6741-47f0-bbc7-97f1d1325f9d",
@@ -29,10 +31,11 @@
     {
       "id": "e06d253c-1991-4d42-a4e1-8982b5682873",
       "texte": "cacao",
-      "pris": false,
+      "pris": true,
       "par": "Moone",
       "cree": 1787164637567,
-      "horodatage": 1787164637567
+      "horodatage": 1787240418720,
+      "supprime": true
     }
   ]
 }
