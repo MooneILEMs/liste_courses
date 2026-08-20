@@ -73,6 +73,10 @@ li .texte::after{
 }
 li.pris .texte{color:var(--rature)}
 li.pris .texte::after{width:calc(100% + 6px)}
+li .qte{
+  font-family:var(--display);font-weight:500;font-size:13px;
+  color:var(--rature);flex:none;
+}
 li .par{
   font-family:var(--display);font-weight:500;font-size:11px;
   color:var(--rature);letter-spacing:.06em;text-transform:uppercase;flex:none;
@@ -142,7 +146,7 @@ a{color:var(--stylo)}
 
 <div id="pied">
   <form id="ajout" autocomplete="off">
-    <input id="saisie" type="text" placeholder="Ajouter…" enterkeyhint="done" aria-label="Nouvel article">
+    <input id="saisie" type="text" placeholder="Ajouter… (ex. lait x2)" enterkeyhint="done" aria-label="Nouvel article">
     <button class="action" type="submit">Ajouter</button>
   </form>
 </div>
@@ -198,6 +202,10 @@ function rendre() {
     t.className = "texte";
     t.textContent = a.texte;
 
+    const qte = document.createElement("span");
+    qte.className = "qte";
+    qte.textContent = a.qte ? `×${a.qte}` : "";
+
     const par = document.createElement("span");
     par.className = "par";
     par.textContent = a.par === cfg?.qui ? "" : (a.par || "");
@@ -209,7 +217,7 @@ function rendre() {
     x.textContent = "×";
     x.addEventListener("click", e => { e.stopPropagation(); retirer(a.id); });
 
-    li.append(t, par, x);
+    li.append(t, qte, par, x);
     li.addEventListener("click", () => basculer(a.id));
     listeEl.append(li);
   }
@@ -245,11 +253,14 @@ const retirer = id => modifier(() => {
 $("#ajout").addEventListener("submit", e => {
   e.preventDefault();
   const champ = $("#saisie");
-  const texte = champ.value.trim();
-  if (!texte) return;
+  const saisie = champ.value.trim();
+  if (!saisie) return;
+  const m = saisie.match(/^(.+?)\s+[x×]\s*(\d+)$/i);
+  const texte = m ? m[1].trim() : saisie;
+  const qte = m ? parseInt(m[2], 10) : null;
   champ.value = "";
   modifier(() => etatDoc.articles.push({
-    id: crypto.randomUUID(), texte, pris: false,
+    id: crypto.randomUUID(), texte, qte, pris: false,
     par: cfg?.qui || "", cree: maintenant(), horodatage: maintenant()
   }));
 });

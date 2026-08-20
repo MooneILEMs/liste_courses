@@ -62,7 +62,7 @@ Add the page to the home screen: it opens full-screen, without a browser bar.
 
 ## Usage
 
-Type then Enter to add. Tap a line to cross it out. The × removes the item, "Retirer ce qui est pris" clears the crossed-out lines all at once.
+Type then Enter to add. End the text with `x` and a number (e.g. `lait x2`) to add a quantity. Tap a line to cross it out. The × removes the item, "Retirer ce qui est pris" clears the crossed-out lines all at once.
 
 ## Limits
 
