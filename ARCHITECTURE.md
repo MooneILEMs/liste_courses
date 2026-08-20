@@ -1,133 +1,133 @@
 # Architecture
 
-Note de lecture pour comprendre ce que fait chaque fichier, sans connaître le web au préalable.
+A reading note to understand what each file does, without needing prior web knowledge.
 
-## Le principe
+## The principle
 
-Il n'y a pas de serveur. Personne ne fait tourner de programme quelque part pour toi.
+There's no server. Nobody runs a program somewhere for you.
 
-Il y a une page, copiée sur les deux téléphones à chaque ouverture, et un fichier de données dans le dépôt qui sert de source unique de vérité. Les deux téléphones lisent et réécrivent ce fichier chacun de leur côté. GitHub joue trois rôles distincts, et c'est ce qui rend le montage un peu déroutant au départ :
+There's a page, copied to both phones on every open, and a data file in the repo that acts as the single source of truth. Both phones read and rewrite that file, each on their own. GitHub plays three distinct roles, which is what makes the setup a bit confusing at first:
 
-| Rôle | Ce que c'est | Payé par |
+| Role | What it is | Paid by |
 |---|---|---|
-| Hébergeur | GitHub Pages sert `docs/` | gratuit (dépôt public) |
-| Base de données | `data/liste.json` dans le dépôt | gratuit |
-| Automate | GitHub Actions envoie le mail | gratuit |
+| Host | GitHub Pages serves `docs/` | free (public repo) |
+| Database | `data/liste.json` in the repo | free |
+| Automation | GitHub Actions sends the email | free |
 
 ```
-        Téléphone 1                                  Téléphone 2
+        Phone 1                                      Phone 2
         ┌──────────┐                                 ┌──────────┐
-        │  la page │                                 │  la page │
+        │  the page│                                 │  the page│
         └────┬─────┘                                 └────┬─────┘
-             │  écrit / lit                    lit / écrit │
-             │        (API GitHub + jeton)                 │
+             │  write / read                 read / write │
+             │        (GitHub API + token)                 │
              └────────────────┐         ┌──────────────────┘
                               ▼         ▼
                     ┌──────────────────────────┐
-                    │   data/liste.json        │   ← le dépôt GitHub
+                    │   data/liste.json        │   ← the GitHub repo
                     └────────────┬─────────────┘
-                                 │  chaque écriture = 1 commit
+                                 │  every write = 1 commit
                                  ▼
                     ┌──────────────────────────┐
                     │   GitHub Actions         │
                     │   .github/workflows      │
                     └────────────┬─────────────┘
-                                 │  SMTP Gmail
+                                 │  Gmail SMTP
                                  ▼
-                          mail à l'autre
+                          email to the other person
 ```
 
-La page elle-même, elle, arrive par un chemin séparé et sans jeton : le téléphone la télécharge depuis `docs/` au premier chargement, puis la garde en cache. Elle ne contient aucune donnée.
+The page itself arrives through a separate, tokenless path: the phone downloads it from `docs/` on first load, then keeps it cached. It contains no data.
 
-## Le cycle d'une modification
+## The lifecycle of a change
 
-C'est une vraie séquence, dans cet ordre :
+It's a real sequence, in this order:
 
-1. Tu tapes « lait » et valides. L'article est ajouté à une liste en mémoire dans le téléphone.
-2. L'écran se redessine immédiatement. Rien n'est encore parti sur le réseau — c'est pour ça que ça ne rame jamais.
-3. La liste est recopiée dans le stockage local du navigateur. Si tu fermes tout maintenant, rien n'est perdu.
-4. Un compte à rebours de 2,5 s démarre. Chaque nouvelle frappe le remet à zéro, ce qui évite un commit par article.
-5. Le compte à rebours arrive à zéro : le téléphone envoie tout le fichier à l'API GitHub, avec le message de commit `liste: maj par Jean`.
-6. GitHub écrit le fichier, crée le commit, et déclenche le workflow.
-7. Le workflow lit le prénom dans le message, en déduit à qui écrire, extrait les articles non pris et envoie le mail.
-8. L'autre téléphone, lui, redemande le fichier toutes les 20 s tant que l'appli est ouverte, et fusionne ce qu'il reçoit.
+1. You type "milk" and confirm. The item is added to a list held in the phone's memory.
+2. The screen redraws immediately. Nothing has gone over the network yet — that's why it never lags.
+3. The list is copied into the browser's local storage. If you close everything right now, nothing is lost.
+4. A 2.5s countdown starts. Every new keystroke resets it, which avoids one commit per item.
+5. The countdown hits zero: the phone sends the whole file to the GitHub API, with the commit message `liste: maj par Jean`.
+6. GitHub writes the file, creates the commit, and triggers the workflow.
+7. The workflow reads the first name from the message, figures out who to email, extracts the items not yet checked off, and sends the email.
+8. The other phone, meanwhile, re-requests the file every 20s while the app is open, and merges whatever it gets back.
 
-Le point 5 mérite une précision. L'API GitHub exige le `sha` de la version qu'on croit modifier. Si l'autre a écrit entre-temps, ce `sha` est périmé et GitHub refuse (erreur 409). L'appli relit alors la version à jour, fusionne article par article en gardant la plus récente des deux dates, et réessaie. C'est ce qui empêche l'un d'écraser l'autre.
+Step 5 deserves a note. The GitHub API requires the `sha` of the version it believes it's modifying. If the other person wrote in the meantime, that `sha` is stale and GitHub refuses (409 error). The app then re-reads the current version, merges item by item keeping the most recent of the two timestamps, and retries. That's what stops one write from overwriting the other.
 
-## Ce que contient chaque fichier
+## What's in each file
 
-| Fichier | Rôle | Modifié par |
+| File | Role | Modified by |
 |---|---|---|
-| `docs/index.html` | toute l'appli : structure, apparence, comportement | toi, à la main |
-| `docs/manifest.json` | permet l'ajout à l'écran d'accueil | jamais |
-| `docs/icon.png` | l'icône de l'appli (PNG, pas SVG — les launchers Android gèrent mal le SVG seul) | jamais |
-| `docs/.nojekyll` | dit à Pages de publier les fichiers tels quels | jamais |
-| `data/liste.json` | la liste | l'appli, automatiquement |
-| `.github/workflows/notif.yml` | recette du mail | toi, si tu changes le SMTP |
+| `docs/index.html` | the whole app: structure, appearance, behavior | you, by hand |
+| `docs/manifest.json` | enables adding it to the home screen | never |
+| `docs/icon.png` | the app icon (PNG, not SVG — Android launchers handle SVG-only icons poorly) | never |
+| `docs/.nojekyll` | tells Pages to publish the files as-is | never |
+| `data/liste.json` | the list | the app, automatically |
+| `.github/workflows/notif.yml` | the email recipe | you, if you change the SMTP setup |
 
-Le jeton n'est nulle part dans cette liste, et c'est volontaire. Il vit dans le navigateur de chaque téléphone.
+The token isn't anywhere in this list, and that's deliberate. It lives in each phone's browser.
 
-## Ce qu'il y a dans index.html
+## What's inside index.html
 
-Un fichier web tient trois choses de nature différente. Dans notre cas elles sont empilées dans le même fichier, faute d'avoir besoin de plus.
+A web file holds three things of a different nature. Here they're all stacked in the same file, since there's no need for more.
 
-**La structure** — les balises `<h1>`, `<ul>`, `<input>`. Ça décrit *quoi* est à l'écran, sans dire à quoi ça ressemble. C'est l'arborescence, l'équivalent d'une hiérarchie de widgets. Elle est courte ici : un titre, une ligne d'état, une liste vide, un champ de saisie, une fenêtre de réglages.
+**The structure** — the `<h1>`, `<ul>`, `<input>` tags. This describes *what* is on screen, without saying what it looks like. It's the tree, the equivalent of a widget hierarchy. It's short here: a title, a status line, an empty list, an input field, a settings window.
 
-**Le style** — le bloc `<style>`. Ça décrit *comment* ça se présente : couleurs, tailles, espacements. On sélectionne des éléments par leur nom ou leur classe et on leur applique des propriétés. Les couleurs et dimensions du projet sont regroupées en haut sous `:root`, c'est là qu'on touche si on veut changer l'allure :
-
-```
---papier    #EFF1EC   le fond
---encre     #1B2A22   le texte
---stylo     #1D3FBE   le trait de rature, les boutons
---marge     #D4453C   le filet vertical rouge
---reglure   #C3D0E8   les lignes horizontales
---ligne     34px      la hauteur d'une ligne du cahier
-```
-
-**Le comportement** — le bloc `<script>`. C'est du JavaScript, et c'est le seul endroit où il y a de la logique. Les fonctions y sont nommées en français :
+**The style** — the `<style>` block. This describes *how* it's presented: colors, sizes, spacing. Elements are selected by name or class and given properties. The project's colors and dimensions are grouped at the top under `:root` — that's where to look to change the look:
 
 ```
-etatDoc          la liste en mémoire
-rendre()         redessine l'écran à partir de etatDoc
-modifier()       applique un changement, sauve en local, planifie l'envoi
-tirer()          lit le fichier depuis GitHub et fusionne
-pousser()        écrit le fichier sur GitHub
-fusionner()      arbitre entre deux versions, article par article
-synchroniser()   décide s'il faut tirer ou pousser
+--papier    #EFF1EC   the background
+--encre     #1B2A22   the text
+--stylo     #1D3FBE   the strikethrough line, the buttons
+--marge     #D4453C   the vertical red margin rule
+--reglure   #C3D0E8   the horizontal lines
+--ligne     34px      the height of one notebook line
 ```
 
-Rien d'autre. Pas de bibliothèque, pas de compilation, pas de `npm install`. Le fichier que tu ouvres est exactement celui qui tourne, ce qui rend le débogage direct.
+**The behavior** — the `<script>` block. This is JavaScript, and the only place with any logic. The functions are named in French:
 
-## Le layout
+```
+etatDoc          the list held in memory
+rendre()         redraws the screen from etatDoc
+modifier()       applies a change, saves locally, schedules the send
+tirer()          reads the file from GitHub and merges
+pousser()        writes the file to GitHub
+fusionner()      arbitrates between two versions, item by item
+synchroniser()   decides whether to pull or push
+```
 
-Une seule colonne, centrée, jamais plus large que 560 px. Sur téléphone elle occupe tout, sur ordinateur elle reste au milieu.
+Nothing else. No library, no build step, no `npm install`. The file you open is exactly the one that runs, which makes debugging direct.
+
+## The layout
+
+A single column, centered, never wider than 560px. On a phone it fills the screen; on a computer it stays in the middle.
 
 ```
 ┌─────────────────────────────────────────┐
-│ │                                       │  ← filet de marge rouge, vertical
-│ │  La liste                             │     titre
-│ │  À jour                               │     ligne d'état (toucher = réglages)
+│ │                                       │  ← vertical red margin rule
+│ │  La liste                             │     title
+│ │  À jour                               │     status line (tap = settings)
 │ │ ─────────────────────────────────     │
-│ │  lait                                 │  ← les lignes sont calées
-│ │ ─────────────────────────────────     │     sur la réglure du cahier
-│ │  farine                    ELSA       │  ← prénom si l'autre l'a ajouté
+│ │  lait                                 │  ← lines are aligned
+│ │ ─────────────────────────────────     │     on the notebook rule
+│ │  farine                    ELSA       │  ← first name shown if the other added it
 │ │ ─────────────────────────────────     │
-│ │  c̶a̶f̶é̶                          ×      │  ← barré, descendu en bas
+│ │  c̶a̶f̶é̶                          ×      │  ← crossed out, sunk to the bottom
 │ │ ─────────────────────────────────     │
 │ │  Retirer ce qui est pris              │
 │ │ ─────────────────────────────────     │
 │ │                                       │
-│ │            (espace vide)              │
+│ │            (empty space)              │
 │ │                                       │
 ├─────────────────────────────────────────┤
-│  [ Ajouter…            ]  [ Ajouter ]   │  ← fixé en bas, à portée de pouce
+│  [ Ajouter…            ]  [ Ajouter ]   │  ← fixed at the bottom, within thumb's reach
 └─────────────────────────────────────────┘
 ```
 
-Trois décisions à connaître, parce qu'elles expliquent le reste du style :
+Three decisions worth knowing, because they explain the rest of the style:
 
-Le fond est une image répétée tous les 34 px, générée en CSS, pas un fichier. La hauteur de ligne du texte vaut exactement ces 34 px, donc chaque article tombe pile sur une ligne. Si tu changes la taille du texte sans changer `--ligne`, le calage se casse — les deux valeurs vont ensemble.
+The background is an image repeated every 34px, generated in CSS, not a file. The text's line height is exactly those 34px, so every item lands right on a line. If you change the text size without changing `--ligne`, the alignment breaks — the two values move together.
 
-Le champ de saisie est en position fixe en bas de l'écran. Sur un téléphone tenu d'une main dans un magasin, c'est la seule zone atteignable au pouce sans se contorsionner. Le titre, lui, n'a aucune importance fonctionnelle et occupe donc la zone la moins accessible.
+The input field is fixed at the bottom of the screen. On a phone held in one hand in a store, it's the only zone reachable by thumb without contorting. The title, meanwhile, has no functional importance, and so occupies the least accessible zone.
 
-Les articles pris descendent automatiquement en bas et se barrent d'un trait bleu tracé en 0,22 s. La rature n'est pas un caractère spécial mais un rectangle bleu de 2 px dont la largeur passe de 0 à 100 %. C'est ce qui donne l'impression d'un trait de stylo qui court.
+Checked-off items automatically sink to the bottom and get struck through with a blue line drawn in 0.22s. The strikethrough isn't a special character but a 2px blue rectangle whose width animates from 0 to 100%. That's what gives the impression of a pen stroke running across.
