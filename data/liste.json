@@ -1,5 +1,5 @@
 {
-  "maj": 1787258329462,
+  "maj": 1787258343447,
   "articles": [
     {
       "id": "7c202284-ee01-4727-afda-571e657ef7d6",
@@ -71,6 +71,15 @@
       "cree": 1787258011852,
       "horodatage": 1787258326957,
       "supprime": true
+    },
+    {
+      "id": "47fa95ca-14ae-4534-b937-d506d524c88f",
+      "texte": "eau de javel",
+      "qte": null,
+      "pris": false,
+      "par": "Moone",
+      "cree": 1787258331827,
+      "horodatage": 1787258331827
     }
   ]
 }
