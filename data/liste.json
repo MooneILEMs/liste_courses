@@ -1,5 +1,5 @@
 {
-  "maj": 1787258014356,
+  "maj": 1787258329462,
   "articles": [
     {
       "id": "7c202284-ee01-4727-afda-571e657ef7d6",
@@ -56,19 +56,21 @@
     {
       "id": "4cbfca4b-294f-497f-a0e0-1e40e8c2b9f7",
       "texte": "lait x2",
-      "pris": false,
+      "pris": true,
       "par": "Moone",
       "cree": 1787257904946,
-      "horodatage": 1787257904946
+      "horodatage": 1787258326957,
+      "supprime": true
     },
     {
       "id": "2e6fe52c-e997-454f-87c7-953292d5828a",
       "texte": "lait",
       "qte": 2,
-      "pris": false,
+      "pris": true,
       "par": "Moone",
       "cree": 1787258011852,
-      "horodatage": 1787258011852
+      "horodatage": 1787258326957,
+      "supprime": true
     }
   ]
 }
