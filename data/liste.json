@@ -1,5 +1,5 @@
 {
-  "maj": 1787240421222,
+  "maj": 1787240467966,
   "articles": [
     {
       "id": "7c202284-ee01-4727-afda-571e657ef7d6",
@@ -36,6 +36,14 @@
       "cree": 1787164637567,
       "horodatage": 1787240418720,
       "supprime": true
+    },
+    {
+      "id": "6776c36d-1436-4256-953f-c06f64ed0b5d",
+      "texte": "pièce de bœuf Etaples",
+      "pris": false,
+      "par": "Moone",
+      "cree": 1787240465375,
+      "horodatage": 1787240465375
     }
   ]
 }
